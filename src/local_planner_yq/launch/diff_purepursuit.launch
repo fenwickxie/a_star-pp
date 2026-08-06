@@ -9,7 +9,7 @@
         <param name="linear_vel_p_coffe" value="0.4"/>
         <param name="thresold_reach" value="0.03"/>
         <param name="robot_ref_vel" value="0.4"/><!--线速度0.15-->
-         <param name="path_flie" value="/home/pyq/localplanner_3d/src/local_planner_yq/path/path.csv"/>
+         <param name="path_flie" value="src/waypoint_record_pkg/path/path.csv"/>
          <param name="read_path_file" value="false"/>
          <param name="gloalplath_topic"  type="string" value="/global_path"/>
         <param name="attiude_aglin" type="string" value="true"/>
@@ -17,9 +17,5 @@
         <param name="ob_thre" value="1.2"/>
         <param name="max_angular" value="0.6"/>
 
-
-
-
-         
     </node>
 </launch>

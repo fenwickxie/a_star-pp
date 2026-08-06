@@ -5,7 +5,7 @@
 
     <param name="geopose_topic" type="string" value="/ground"/><!--定位话题是消息格式geometry_msgs::PoseStamped-->
     
-    <param name="path_file" type="string" value="/home/pyq/localplanner_3d/src/waypoint_record_pkg/path/" />
+    <param name="path_file" type="string" value="cmu/src/waypoint_record_pkg/path"/>
     <param name="record_therold" type="double" value="0.1"/>
     <param name="world_frame" type="string" value="/world"/>
     

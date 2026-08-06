@@ -147,8 +147,6 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
  add_executable(diff_purepursuit src/diff_purepursuit.cpp src/main.cpp)
- add_executable(pid_path_tracker src/pid_path_tracker.cpp src/pid_tracker_main.cpp)
- add_executable(cmd_vel_stamper src/cmd_vel_stamper.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -159,8 +157,6 @@ include_directories(
 ## Add cmake target dependencies of the executable
 ## same as for the library above
  add_dependencies(diff_purepursuit ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- add_dependencies(pid_path_tracker ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
- add_dependencies(cmd_vel_stamper ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
  target_link_libraries(diff_purepursuit
@@ -170,15 +166,6 @@ include_directories(
    gflags
 
    Threads::Threads
-   )
-
- target_link_libraries(pid_path_tracker
-   ${catkin_LIBRARIES}
-   Threads::Threads
-   )
-
- target_link_libraries(cmd_vel_stamper
-   ${catkin_LIBRARIES}
    )
 
 
