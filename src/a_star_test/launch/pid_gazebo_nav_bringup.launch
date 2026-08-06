@@ -1,0 +1,115 @@
+<launch>
+  <param name="use_sim_time" value="true" />
+
+  <!-- ===== Runtime Switches ===== -->
+  <arg name="use_vehicle_sim" default="true" />
+  <arg name="use_map_server" default="true" />
+  <arg name="use_amcl" default="false" />
+  <arg name="start_rviz" default="true" />
+
+  <!-- ===== Gazebo/Vehicle Simulator ===== -->
+  <arg name="sim_launch_file" default="/home/dev/catkin_ws/autonomous_exploration_development_environment/src/vehicle_simulator/launch/vehicle_simulator.launch" />
+  <arg name="world_name" default="garage" />
+  <arg name="gazebo_gui" default="true" />
+  <arg name="vehicleX" default="0" />
+  <arg name="vehicleY" default="0" />
+  <arg name="vehicleYaw" default="0" />
+  <arg name="vehicleHeight" default="0.75" />
+
+  <!-- ===== Navigation Map ===== -->
+  <arg name="map" default="test2.yaml" />
+  <arg name="map_topic" default="/map" />
+  <arg name="goal_topic" default="/move_base_simple/goal" />
+
+  <!-- ===== Frame Setup ===== -->
+  <!-- vehicle_simulator publishes TF map->sensor; use sensor as base_frame for planner/tracker -->
+  <arg name="world_frame" default="map" />
+  <arg name="base_frame" default="sensor" />
+
+  <!-- ===== PID Tracker Params ===== -->
+  <arg name="lookahead_distance" default="0.8" />
+  <arg name="goal_dist_threshold" default="0.10" />
+  <arg name="desired_vel" default="0.35" />
+  <arg name="max_ang_vel" default="0.8" />
+  <arg name="pure_pursuit_mode" default="1" />
+
+  <!-- ===== Start Gazebo Vehicle Sim ===== -->
+  <group if="$(arg use_vehicle_sim)">
+    <include file="$(arg sim_launch_file)">
+      <arg name="world_name" value="$(arg world_name)"/>
+      <arg name="gui" value="$(arg gazebo_gui)"/>
+      <arg name="use_sim_time" value="true"/>
+      <arg name="vehicleX" value="$(arg vehicleX)"/>
+      <arg name="vehicleY" value="$(arg vehicleY)"/>
+      <arg name="vehicleYaw" value="$(arg vehicleYaw)"/>
+      <arg name="vehicleHeight" value="$(arg vehicleHeight)"/>
+    </include>
+
+    <!-- Make planning base frame explicit for RViz tools if needed -->
+    <node pkg="tf" type="static_transform_publisher" name="sensor_to_base_link"
+          args="0 0 0 0 0 0 sensor base_link 100"/>
+  </group>
+
+  <!-- ===== Map + AMCL (optional) ===== -->
+  <group if="$(arg use_map_server)">
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find a_star_test)/maps/$(arg map)" />
+  </group>
+
+  <group if="$(arg use_amcl)">
+    <include file="$(find mrobot_navigation)/launch/amcl.launch" />
+  </group>
+
+  <!-- ===== Global Planner: A* ===== -->
+  <node pkg="a_star_test" type="a_star_test" name="a_star_test" output="screen">
+    <param name="base_frame" type="string" value="$(arg base_frame)"/>
+    <param name="world_frame" type="string" value="$(arg world_frame)"/>
+    <param name="inflation_radius" type="double" value="0.3"/>
+    <param name="dis_occ" type="double" value="0.8"/>
+    <param name="map_topic" type="string" value="$(arg map_topic)"/>
+    <param name="goal_topic" type="string" value="$(arg goal_topic)"/>
+  </node>
+
+  <!-- ===== Local Tracker: PID (publish unstamped Twist) ===== -->
+  <node pkg="local_planner_yq" type="pid_path_tracker" name="pid_path_tracker" output="screen">
+    <param name="world_frame" value="$(arg world_frame)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+
+    <param name="global_path_topic" value="/global_path"/>
+    <param name="cmd_topic" value="/cmd_vel_unstamped"/>
+
+    <param name="loop_rate" value="30.0"/>
+    <param name="publish_vel" value="true"/>
+
+    <param name="lookahead_distance" value="$(arg lookahead_distance)"/>
+    <param name="goal_dist_threshold" value="$(arg goal_dist_threshold)"/>
+
+    <param name="align_while_plan" value="true"/>
+    <param name="angle_max_deg" value="20.0"/>
+    <param name="angle_align_deg" value="5.0"/>
+    <param name="angle_goal_stop_deg" value="3.0"/>
+
+    <param name="enable_backward_tracking" value="true"/>
+    <param name="desired_vel" value="$(arg desired_vel)"/>
+    <param name="max_ang_vel" value="$(arg max_ang_vel)"/>
+
+    <param name="critical_angle_deg" value="45.0"/>
+    <param name="curvature_scaling_angle_deg" value="25.0"/>
+
+    <param name="pow_k" value="2.0"/>
+    <param name="min_vel" value="0.04"/>
+    <param name="dock_blend_threshold" value="0.10"/>
+
+    <param name="pure_pursuit_mode" value="$(arg pure_pursuit_mode)"/>
+  </node>
+
+  <!-- ===== Twist -> TwistStamped bridge for vehicle_simulator ===== -->
+  <node if="$(arg use_vehicle_sim)" pkg="local_planner_yq" type="cmd_vel_stamper" name="cmd_vel_stamper" output="screen">
+    <param name="input_topic" value="/cmd_vel_unstamped"/>
+    <param name="output_topic" value="/cmd_vel"/>
+    <param name="frame_id" value="$(arg base_frame)"/>
+  </node>
+
+  <!-- ===== RViz ===== -->
+  <node if="$(arg start_rviz)" pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find a_star_test)/rviz/yq_mpc.rviz"/>
+</launch>

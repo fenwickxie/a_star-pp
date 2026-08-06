@@ -1,0 +1,84 @@
+<launch>
+  <param name="use_sim_time" value="true" />
+
+  <!-- ===== Global Args ===== -->
+  <arg name="map" default="test2.yaml" />
+  <arg name="use_map_server" default="true" />
+  <arg name="use_amcl" default="false" />
+  <arg name="start_rviz" default="true" />
+
+  <!-- A* params -->
+  <arg name="base_frame" default="base_link" />
+  <arg name="world_frame" default="map" />
+  <arg name="inflation_radius" default="0.3" />
+  <arg name="dis_occ" default="0.8" />
+  <arg name="map_topic" default="/map" />
+  <arg name="goal_topic" default="/move_base_simple/goal" />
+
+  <!-- PID tracker params -->
+  <arg name="cmd_topic" default="/cmd_vel" />
+  <arg name="global_path_topic" default="/global_path" />
+
+  <arg name="lookahead_distance" default="0.8" />
+  <arg name="goal_dist_threshold" default="0.10" />
+  <arg name="desired_vel" default="0.35" />
+  <arg name="max_ang_vel" default="0.8" />
+  <arg name="pure_pursuit_mode" default="1" />
+
+  <!-- ===== Map Server (optional) ===== -->
+  <group if="$(arg use_map_server)">
+    <node name="map_server" pkg="map_server" type="map_server" args="$(find a_star_test)/maps/$(arg map)" />
+  </group>
+
+  <!-- ===== AMCL (optional, requires mrobot_navigation package) ===== -->
+  <group if="$(arg use_amcl)">
+    <include file="$(find mrobot_navigation)/launch/amcl.launch" />
+  </group>
+
+  <!-- ===== Global Planner: A* ===== -->
+  <node pkg="a_star_test" type="a_star_test" name="a_star_test" output="screen">
+    <param name="base_frame" type="string" value="$(arg base_frame)"/>
+    <param name="world_frame" type="string" value="$(arg world_frame)"/>
+    <param name="inflation_radius" type="double" value="$(arg inflation_radius)"/>
+    <param name="dis_occ" type="double" value="$(arg dis_occ)"/>
+    <param name="map_topic" type="string" value="$(arg map_topic)"/>
+    <param name="goal_topic" type="string" value="$(arg goal_topic)"/>
+  </node>
+
+  <!-- ===== Local Tracker: PID (ROS1 port) ===== -->
+  <node pkg="local_planner_yq" type="pid_path_tracker" name="pid_path_tracker" output="screen">
+    <param name="world_frame" value="$(arg world_frame)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+
+    <param name="global_path_topic" value="$(arg global_path_topic)"/>
+    <param name="cmd_topic" value="$(arg cmd_topic)"/>
+
+    <param name="loop_rate" value="30.0"/>
+    <param name="publish_vel" value="true"/>
+
+    <param name="lookahead_distance" value="$(arg lookahead_distance)"/>
+    <param name="goal_dist_threshold" value="$(arg goal_dist_threshold)"/>
+
+    <param name="align_while_plan" value="true"/>
+    <param name="angle_max_deg" value="20.0"/>
+    <param name="angle_align_deg" value="5.0"/>
+    <param name="angle_goal_stop_deg" value="3.0"/>
+
+    <param name="enable_backward_tracking" value="true"/>
+    <param name="desired_vel" value="$(arg desired_vel)"/>
+    <param name="max_ang_vel" value="$(arg max_ang_vel)"/>
+
+    <param name="critical_angle_deg" value="45.0"/>
+    <param name="curvature_scaling_angle_deg" value="25.0"/>
+
+    <param name="pow_k" value="2.0"/>
+    <param name="min_vel" value="0.04"/>
+    <param name="dock_blend_threshold" value="0.10"/>
+
+    <param name="pure_pursuit_mode" value="$(arg pure_pursuit_mode)"/>
+  </node>
+
+  <!-- ===== RViz ===== -->
+  <node if="$(arg start_rviz)" pkg="rviz" type="rviz" name="rviz"
+        args="-d $(find a_star_test)/rviz/yq_mpc.rviz"/>
+</launch>

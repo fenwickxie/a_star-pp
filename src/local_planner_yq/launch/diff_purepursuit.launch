@@ -1,0 +1,25 @@
+<launch>
+    <param name="use_sim_time" value="true" />
+    <node pkg="local_planner_yq" name="diff_purepursuit" type="diff_purepursuit" output="screen">
+        <param name="forward_sight_dis" value="1.2"/>
+        <param name="forward_sight_dis_coffie" value="0.2"/>
+        <param name="base_frame" value="base_link"/>
+        <param name="world_frame" value="map"/>
+        <param name="yaw_to_omega_coffe" value="1.0"/>
+        <param name="linear_vel_p_coffe" value="0.4"/>
+        <param name="thresold_reach" value="0.03"/>
+        <param name="robot_ref_vel" value="0.4"/><!--线速度0.15-->
+         <param name="path_flie" value="/home/pyq/localplanner_3d/src/local_planner_yq/path/path.csv"/>
+         <param name="read_path_file" value="false"/>
+         <param name="gloalplath_topic"  type="string" value="/global_path"/>
+        <param name="attiude_aglin" type="string" value="true"/>
+        <param name="pointcloude_topic" value="/cloud_registeredpoint"/>
+        <param name="ob_thre" value="1.2"/>
+        <param name="max_angular" value="0.6"/>
+
+
+
+
+         
+    </node>
+</launch>
