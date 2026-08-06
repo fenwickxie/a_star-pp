@@ -6,6 +6,7 @@
   <arg name="use_map_server" default="true" />
   <arg name="use_amcl" default="false" />
   <arg name="start_rviz" default="true" />
+  <arg name="use_cmd_vel_stamper" default="false" />
 
   <!-- ===== Gazebo/Vehicle Simulator ===== -->
   <arg name="sim_launch_file" default="/home/dev/catkin_ws/autonomous_exploration_development_environment/src/vehicle_simulator/launch/vehicle_simulator.launch" />
@@ -69,13 +70,13 @@
     <param name="goal_topic" type="string" value="$(arg goal_topic)"/>
   </node>
 
-  <!-- ===== Local Tracker: PID (publish unstamped Twist) ===== -->
+  <!-- ===== Local Tracker: PID (publish Twist directly to /cmd_vel) ===== -->
   <node pkg="local_planner_yq" type="pid_path_tracker" name="pid_path_tracker" output="screen">
     <param name="world_frame" value="$(arg world_frame)"/>
     <param name="base_frame" value="$(arg base_frame)"/>
 
     <param name="global_path_topic" value="/global_path"/>
-    <param name="cmd_topic" value="/cmd_vel_unstamped"/>
+    <param name="cmd_topic" value="/cmd_vel"/>
 
     <param name="loop_rate" value="30.0"/>
     <param name="publish_vel" value="true"/>
@@ -102,9 +103,9 @@
     <param name="pure_pursuit_mode" value="$(arg pure_pursuit_mode)"/>
   </node>
 
-  <!-- ===== Twist -> TwistStamped bridge for vehicle_simulator ===== -->
-  <node if="$(arg use_vehicle_sim)" pkg="local_planner_yq" type="cmd_vel_stamper" name="cmd_vel_stamper" output="screen">
-    <param name="input_topic" value="/cmd_vel_unstamped"/>
+  <!-- ===== Optional Twist -> TwistStamped bridge for vehicle_simulator ===== -->
+  <node if="$(arg use_cmd_vel_stamper)" pkg="local_planner_yq" type="cmd_vel_stamper" name="cmd_vel_stamper" output="screen">
+    <param name="input_topic" value="/cmd_vel"/>
     <param name="output_topic" value="/cmd_vel"/>
     <param name="frame_id" value="$(arg base_frame)"/>
   </node>
