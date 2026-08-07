@@ -64,7 +64,7 @@ void PurePursuit::StopObstacleHandle(void) {
     // std::cout<<"1111111111111"<<std::endl;
     sleep(0.001);
     m_mutex_.lock();
-    if (scan_.ranges.size() > 0) {
+    if (enable_scan_stop_ && scan_.ranges.size() > 0) {
       auto ScanNearstPointIterator =
           std::min_element(scan_.ranges.begin(), scan_.ranges.end()); //
 
@@ -74,12 +74,12 @@ void PurePursuit::StopObstacleHandle(void) {
       auto closet_angle =
           scan_.angle_min + scan_.angle_increment * NearstPointIndex;
 
-      if ((NearstPointIndex > 150 &&
+      if ((NearstPointIndex > scan_stop_index_min_ &&
            NearstPointIndex <
-               210)) // 根据单线雷达来设计，机器人正前方雷达线是第180根，则左右各扩展一部分，再根据距离判断停障
+               scan_stop_index_max_)) // 根据单线雷达来设计，机器人正前方雷达线是第180根，则左右各扩展一部分，再根据距离判断停障
       {
-        if (scan_.ranges[NearstPointIndex] < 0.8 &&
-            scan_.ranges[NearstPointIndex] > 0.1) {
+        if (scan_.ranges[NearstPointIndex] < scan_stop_dis_thre_ &&
+            scan_.ranges[NearstPointIndex] > scan_stop_dis_min_valid_) {
           std::cout << "NearstPointIndex is :" << NearstPointIndex << std::endl;
           // std::cout<<"closet_angle is :"<<closet_angle * 180.0 /
           // M_PI<<std::endl; std::cout<<"closet_DISTANCE is
@@ -91,10 +91,12 @@ void PurePursuit::StopObstacleHandle(void) {
           }
         }
 
-      } else {
-        stop_obstacle_trig_ = false;
-        //  ROS_INFO("NO OBSTACLE  DECECTE");
-      }
+            } else {
+                stop_obstacle_trig_ = false;
+                //  ROS_INFO("NO OBSTACLE  DECECTE");
+            }
+        } else if (!enable_scan_stop_) {
+            stop_obstacle_trig_ = false;
     }
 
     /*************************处理点云雷达
@@ -209,6 +211,11 @@ void PurePursuit::initParams(void)
     private_nh_.getParam("pointcloude_topic", pointcloude_topic_);
   private_nh_.getParam("ob_thre", ob_thre_);
   private_nh_.getParam("max_angular", max_angular_);
+    private_nh_.getParam("enable_scan_stop", enable_scan_stop_);
+    private_nh_.getParam("scan_stop_dis_thre", scan_stop_dis_thre_);
+    private_nh_.getParam("scan_stop_index_min", scan_stop_index_min_);
+    private_nh_.getParam("scan_stop_index_max", scan_stop_index_max_);
+    private_nh_.getParam("scan_stop_dis_min_valid", scan_stop_dis_min_valid_);
 
 
     

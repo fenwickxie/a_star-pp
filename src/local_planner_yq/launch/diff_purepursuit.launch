@@ -1,5 +1,11 @@
 <launch>
     <param name="use_sim_time" value="true" />
+    <arg name="enable_scan_stop" default="true"/>
+    <arg name="scan_stop_dis_thre" default="0.20"/>
+    <arg name="scan_stop_index_min" default="170"/>
+    <arg name="scan_stop_index_max" default="190"/>
+    <arg name="scan_stop_dis_min_valid" default="0.05"/>
+
     <node pkg="local_planner_yq" name="diff_purepursuit" type="diff_purepursuit" output="screen">
         <param name="forward_sight_dis" value="1.2"/>
         <param name="forward_sight_dis_coffie" value="0.2"/>
@@ -16,6 +22,11 @@
         <param name="pointcloude_topic" value="/cloud_registeredpoint"/>
         <param name="ob_thre" value="1.2"/>
         <param name="max_angular" value="0.6"/>
+        <param name="enable_scan_stop" value="$(arg enable_scan_stop)"/>
+        <param name="scan_stop_dis_thre" value="$(arg scan_stop_dis_thre)"/>
+        <param name="scan_stop_index_min" value="$(arg scan_stop_index_min)"/>
+        <param name="scan_stop_index_max" value="$(arg scan_stop_index_max)"/>
+        <param name="scan_stop_dis_min_valid" value="$(arg scan_stop_dis_min_valid)"/>
 
     </node>
 </launch>

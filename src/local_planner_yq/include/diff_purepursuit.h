@@ -196,6 +196,11 @@ private:
         std::string pointcloude_topic_;
         double ob_thre_ = 1.2;
         double max_angular_=0.3;
+        bool enable_scan_stop_ = true;
+        double scan_stop_dis_thre_ = 0.30;
+        int scan_stop_index_min_ = 165;
+        int scan_stop_index_max_ = 195;
+        double scan_stop_dis_min_valid_ = 0.05;
 
 
 

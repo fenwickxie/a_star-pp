@@ -1,15 +1,28 @@
 <launch>
     <param name="use_sim_time" value="true" />
+
+    <arg name="base_frame" default="base_link"/>
+    <arg name="world_frame" default="map"/>
+    <arg name="inflation_radius" default="0.10"/>
+    <arg name="dis_occ" default="0.15"/>
+    <arg name="map_topic" default="/map"/>
+    <arg name="goal_topic" default="/move_base_simple/goal"/>
+    <arg name="open_rviz" default="true"/>
+    <arg name="rviz_config" default="$(find a_star_test)/rviz/yq_mpc.rviz"/>
+
     <node pkg="a_star_test" type="a_star_test" name="a_star_test" output="screen">
-        <param name="base_frame" type="string" value="base_link"/>
-        <param name="world_frame" type="string" value="map"/>
-        <param name="inflation_radius" type="double" value="0.3"/>
-        <param name="dis_occ" type="double" value="0.8"/><!--距离最近障碍物距离小于这个阈值，则不采用这个待选栅格-->
-        <param name="map_topic" type="string" value="/map"/>
-        <param name="goal_topic" type="string" value="/move_base_simple/goal"/>
+        <param name="base_frame" type="string" value="$(arg base_frame)"/>
+        <param name="world_frame" type="string" value="$(arg world_frame)"/>
+        <param name="inflation_radius" type="double" value="$(arg inflation_radius)"/>
+        <param name="dis_occ" type="double" value="$(arg dis_occ)"/><!--距离最近障碍物距离小于这个阈值，则不采用这个待选栅格-->
+        <param name="map_topic" type="string" value="$(arg map_topic)"/>
+        <param name="goal_topic" type="string" value="$(arg goal_topic)"/>
 
     </node>
-     <node pkg="rviz" type="rviz" name="rviz" args="-d $(find a_star_test)/rviz/yq_mpc.rviz"/>
+
+    <group if="$(arg open_rviz)">
+        <node pkg="rviz" type="rviz" name="rviz_a_star" args="-d $(arg rviz_config)"/>
+    </group>
 
 
 
